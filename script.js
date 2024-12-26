@@ -1,103 +1,153 @@
-// Select elements from the DOM
-const todoInput = document.getElementById("todo-input");
-const addButton = document.getElementById("add-button");
-const todoList = document.getElementById("todo-list");
+    const todoInput = document.getElementById("todo-input");
+    const addButton = document.getElementById("add-button");
+    const todoList = document.getElementById("todo-list");
+    const loginButton = document.getElementById("login-button");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const loginForm = document.getElementById("login-form");
+    const todoSection = document.getElementById("todo-section");
+    const errorMessage = document.getElementById("error-message");
+    const registerLink = document.getElementById("register-link");
+    const logoutButton = document.getElementById("logout-button");
+    const greetingText = document.getElementById("greeting-text");
 
-// Key for storing tasks in localStorage
-const LOCAL_STORAGE_KEY = "todoListTasks";
+    const LOCAL_STORAGE_KEY = "todoListTasks";
+    const USER_STORAGE_KEY = "users"; // Store all users in localStorage
 
-// Load tasks from localStorage on page load
-document.addEventListener("DOMContentLoaded", loadTasks);
+    document.addEventListener("DOMContentLoaded", loadTasks);
 
-// Add a new task when clicking the "Add" button
-addButton.addEventListener("click", addTask);
+    loginButton.addEventListener("click", loginUser);
+    logoutButton.addEventListener("click", logoutUser);
 
-function addTask() {
-  const taskText = todoInput.value.trim();
+    function loginUser() {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+      const users = JSON.parse(localStorage.getItem(USER_STORAGE_KEY)) || [];
 
-  // Prevent adding empty tasks
-  if (taskText === "") {
-    alert("Please enter a task!");
-    return;
-  }
+      const user = users.find(u => u.username === username && u.password === password);
 
-  // Create a task object
-  const task = {
-    text: taskText,
-    completed: false, // New tasks are not completed by default
-  };
+      if (user) {
+        // User found, log in successfully
+        localStorage.setItem('loggedInUser', username); // Store logged-in user in localStorage
+        loginForm.style.display = "none";
+        todoSection.style.display = "block";
+        displayGreeting(username); // Display the greeting message
+        loadTasks(); // Load the user's tasks after login
+      } else {
+        // Invalid username or password
+        errorMessage.style.display = "block";
+      }
+    }
 
-  // Add task to the DOM
-  createTaskElement(task);
+    registerLink.addEventListener("click", function () {
+      const username = prompt("Enter a username for registration:");
+      const password = prompt("Enter a password:");
 
-  // Save task to localStorage
-  saveTaskToLocalStorage(task);
+      if (username && password) {
+        const users = JSON.parse(localStorage.getItem(USER_STORAGE_KEY)) || [];
 
-  // Clear the input box
-  todoInput.value = "";
-}
+        // No need to check for username uniqueness
+        users.push({ username, password });
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(users));
+        alert("Registration successful! You can now log in.");
+      }
+    });
 
-function createTaskElement(task) {
-  // Create the <li> element
-  const listItem = document.createElement("li");
-  listItem.className = "todo-item";
-  if (task.completed) {
-    listItem.classList.add("completed"); // Add 'completed' class if the task is completed
-  }
+    addButton.addEventListener("click", addTask);
 
-  // Create the <span> for the task text
-  const taskSpan = document.createElement("span");
-  taskSpan.textContent = task.text;
+    function addTask() {
+      const taskText = todoInput.value.trim();
 
-  // Create the "Complete" button
-  const completeButton = document.createElement("button");
-  completeButton.textContent = "Complete";
-  completeButton.addEventListener("click", () => {
-    listItem.classList.toggle("completed");
-    task.completed = !task.completed; // Update the task's completion status
-    updateLocalStorage();
-  });
+      if (taskText === "") {
+        alert("Please enter a task!");
+        return;
+      }
 
-  // Create the "Delete" button
-  const deleteButton = document.createElement("button");
-  deleteButton.textContent = "Delete";
-  deleteButton.addEventListener("click", () => {
-    todoList.removeChild(listItem);
-    deleteTaskFromLocalStorage(task.text); // Remove task from localStorage
-  });
+      const task = {
+        text: taskText,
+        completed: false,
+      };
 
-  // Add the task text and buttons to the <li>
-  listItem.appendChild(taskSpan);
-  listItem.appendChild(completeButton);
-  listItem.appendChild(deleteButton);
+      createTaskElement(task);
+      saveTaskToLocalStorage(task);
+      todoInput.value = "";
+    }
 
-  // Add the <li> to the task list
-  todoList.appendChild(listItem);
-}
+    function createTaskElement(task) {
+      const listItem = document.createElement("li");
+      listItem.className = "todo-item";
+      if (task.completed) {
+        listItem.classList.add("completed");
+      }
 
-function saveTaskToLocalStorage(task) {
-  const tasks = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
-  tasks.push(task);
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tasks)); // Save tasks as a JSON string
-}
+      const taskSpan = document.createElement("span");
+      taskSpan.textContent = task.text;
 
-function loadTasks() {
-  const tasks = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
-  tasks.forEach(createTaskElement); // Recreate each task in the DOM
-}
+      const completeButton = document.createElement("button");
+      completeButton.textContent = "Complete";
+      completeButton.addEventListener("click", () => {
+        listItem.classList.toggle("completed");
+        task.completed = !task.completed;
+        updateLocalStorage();
+      });
 
-function deleteTaskFromLocalStorage(taskText) {
-  const tasks = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
-  const updatedTasks = tasks.filter((task) => task.text !== taskText); // Remove the deleted task
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
-}
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.addEventListener("click", () => {
+        todoList.removeChild(listItem);
+        deleteTaskFromLocalStorage(task.text);
+      });
 
-function updateLocalStorage() {
-  const tasks = [];
-  todoList.querySelectorAll(".todo-item").forEach((item) => {
-    const taskText = item.querySelector("span").textContent;
-    const completed = item.classList.contains("completed");
-    tasks.push({ text: taskText, completed: completed });
-  });
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tasks));
-}
+      listItem.appendChild(taskSpan);
+      listItem.appendChild(completeButton);
+      listItem.appendChild(deleteButton);
+      todoList.appendChild(listItem);
+    }
+
+    function saveTaskToLocalStorage(task) {
+      const loggedInUser = localStorage.getItem('loggedInUser');
+      const tasks = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
+      if (!tasks[loggedInUser]) {
+        tasks[loggedInUser] = [];
+      }
+      tasks[loggedInUser].push(task);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+      const loggedInUser = localStorage.getItem('loggedInUser');
+      const tasks = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
+      const userTasks = tasks[loggedInUser] || [];
+      userTasks.forEach(createTaskElement);
+    }
+
+    function deleteTaskFromLocalStorage(taskText) {
+      const loggedInUser = localStorage.getItem('loggedInUser');
+      const tasks = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
+      const updatedTasks = tasks[loggedInUser].filter(task => task.text !== taskText);
+      tasks[loggedInUser] = updatedTasks;
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function updateLocalStorage() {
+      const loggedInUser = localStorage.getItem('loggedInUser');
+      const tasks = [];
+      todoList.querySelectorAll(".todo-item").forEach((item) => {
+        const taskText = item.querySelector("span").textContent;
+        const completed = item.classList.contains("completed");
+        tasks.push({ text: taskText, completed: completed });
+      });
+      const allTasks = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
+      allTasks[loggedInUser] = tasks;
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allTasks));
+    }
+
+    function logoutUser() {
+      localStorage.removeItem("loggedInUser");
+      loginForm.style.display = "block";
+      todoSection.style.display = "none";
+    }
+
+    function displayGreeting(username) {
+      greetingText.textContent = `Welcome, ${username}!`;
+    }
