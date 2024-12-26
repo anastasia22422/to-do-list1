@@ -1,20 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To-Do List</title>
-  <link rel="stylesheet" href="main.css">
-</head>
 <body>
   <div class="todo-container">
     <h1>To-Do List</h1>
-    <div class="todo-input">
-      <input type="text" id="todo-input" placeholder="Add a new task">
-      <button id="add-button">Add</button>
+
+    <!-- Login Form -->
+    <div id="login-form" style="text-align: center">
+      <div style="margin: 20px">
+      <input type="text" id="username" placeholder="Username" required style="margin-bottom: 8px">
+      <input type="password" id="password" placeholder="Password" required>
+      </div>
+      <div style="text-align: center">
+      <button id="login-button">Login</button>
+      <p id="error-message" style="color: red; display: none;">Invalid username or password.</p>
+      <p>Don't have an account? <a href="#" id="register-link">Register here</a></p>
+      </div>
     </div>
-    <ul id="todo-list"></ul>
+
+    <!-- Todo List Section (hidden by default) -->
+    <div id="todo-section" style="display: none;">
+      <div id="greeting-section" style="text-align: center">
+        <span id="greeting-text" class="greeting"></span>
+      </div>
+      <div class="todo-input">
+        <input type="text" id="todo-input" placeholder="Add a new task">
+      </div>
+      <div style="text-align: center">
+        <button id="add-button">Add</button>
+        <button id="logout-button">Log out</button>
+      </div>
+      <ul id="todo-list"></ul>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
